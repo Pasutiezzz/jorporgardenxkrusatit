@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pcshscr krusatit 4/2 - 2 4 5 สวนพฤกษศาสตร์</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-main: #f4f8f5;
+      --card-bg: #ffffff;
+      --primary-green: #15803d;
+      --primary-light: #22c55e;
+      --accent-green: #dcfce7;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      font-family: 'Sarabun', 'Prompt', sans-serif; 
+      background-color: var(--bg-main);
+      color: var(--text-main); 
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    .dashboard { max-width: 1250px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Header Section */
+    .header-card { 
+      background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+      color: white;
+      padding: 25px 30px; 
+      border-radius: 20px; 
+      box-shadow: var(--shadow-md);
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      flex-wrap: wrap; 
+      gap: 15px; 
+    }
+
+    .header-title h1 { 
+      font-family: 'Prompt', sans-serif;
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem); 
+      font-weight: 700;
+    }
+    .header-title p { font-size: clamp(0.85rem, 1.8vw, 1rem); opacity: 0.95; margin-top: 4px; }
+    
+    .sensor-notice {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: white;
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background-color: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    }
+
+    /* Control Bar */
+    .control-bar { 
+      background: var(--card-bg); 
+      padding: 16px 20px; 
+      border-radius: 16px; 
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      flex-wrap: wrap; 
+      gap: 15px; 
+    }
+    .date-picker-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .date-picker-group label { font-weight: 600; font-size: 0.95rem; color: var(--primary-green); }
+    select.date-select { 
+      padding: 9px 16px; 
+      border-radius: 10px; 
+      border: 1.5px solid var(--primary-light); 
+      background: white; 
+      font-family: inherit; 
+      font-size: 0.95rem; 
+      color: var(--text-main); 
+      outline: none; 
+      cursor: pointer; 
+    }
+
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-refresh { 
+      background-color: var(--primary-green); 
+      color: white; 
+      border: none; 
+      padding: 10px 18px; 
+      border-radius: 10px; 
+      font-weight: 600; 
+      font-family: 'Prompt', sans-serif;
+      cursor: pointer; 
+      box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2);
+      transition: all 0.2s ease; 
+    }
+    .btn-refresh:hover { background-color: #166534; transform: translateY(-1px); }
+    .btn-export {
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-family: 'Prompt', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-export:hover { background-color: #0369a1; transform: translateY(-1px); }
+
+    /* Metric Cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .card { 
+      background: var(--card-bg); 
+      border-radius: 16px; 
+      padding: 20px; 
+      border: 1px solid var(--border-color); 
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+    
+    .metric-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .metric-value { font-family: 'Prompt', sans-serif; font-size: clamp(1.8rem, 3vw, 2.2rem); font-weight: 700; color: var(--primary-green); margin: 6px 0; }
+    .metric-status { font-size: 0.85rem; font-weight: 600; }
+
+    /* Main Section */
+    .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .section-title { 
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.1rem; 
+      color: var(--primary-green); 
+      font-weight: 700; 
+      margin-bottom: 14px; 
+      padding-bottom: 8px; 
+      border-bottom: 2px solid var(--accent-green); 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chart-container { position: relative; height: 300px; width: 100%; }
+    
+    .daily-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+    .daily-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 10px 14px; 
+      background: #f9fafb; 
+      border-radius: 10px; 
+      border: 1px solid var(--border-color);
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .daily-item:hover { background: var(--accent-green); border-color: var(--primary-light); }
+    .daily-date { font-weight: 600; font-size: 0.9rem; }
+    .daily-avg { font-weight: 700; color: var(--primary-green); background: white; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; border: 1px solid var(--border-color); }
+
+    /* Zone Map Card */
+    .map-container {
+      position: relative;
+      width: 100%;
+      max-height: 520px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: #111827;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .map-img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .map-container:hover .map-img {
+      transform: scale(1.015);
+    }
+    .map-overlay-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-family: 'Prompt', sans-serif;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Plant Evaluation Tools & Cards */
+    .filter-container { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .search-input {
+      flex: 1; min-width: 250px; padding: 9px 16px; border-radius: 10px;
+      border: 1px solid var(--border-color); background: white; color: var(--text-main); font-family: inherit; outline: none;
+    }
+    .search-input:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); }
+    
+    .select-zone {
+      padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-color);
+      background: white; font-family: 'Prompt', sans-serif; font-size: 0.85rem; color: var(--text-main); outline: none; cursor: pointer;
+    }
+
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border-color);
+      background: white; color: var(--text-muted); font-size: 0.85rem; font-family: 'Prompt', sans-serif; cursor: pointer; font-weight: 500; transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--primary-green); color: white; border-color: var(--primary-green); }
+
+    .zone-block { margin-bottom: 20px; background: #f9fafb; border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); }
+    .zone-header { font-family: 'Prompt', sans-serif; font-weight: 700; color: var(--primary-green); margin-bottom: 12px; font-size: 1.05rem; }
+    .plant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+
+    .plant-card { 
+      background: white; 
+      border-radius: 14px; 
+      border: 1px solid var(--border-color); 
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .plant-card:hover { border-color: var(--primary-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    
+    .plant-icon-banner {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 4rem;
+      user-select: none;
+    }
+
+    .plant-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .plant-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+    .plant-name { font-family: 'Prompt', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text-main); }
+    .local-names { font-size: 0.78rem; color: #166534; font-weight: 500; }
+    .sci-name { font-style: italic; font-size: 0.8rem; color: #4b5563; }
+    
+    .badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+    .badge-high { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .badge-medium { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-low { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    .plant-detail-info { font-size: 0.8rem; color: #4b5563; line-height: 1.45; background: #f9fafb; padding: 9px; border-radius: 8px; border: 1px solid #f3f4f6; }
+
+    .btn-registry {
+      margin-top: auto;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--primary-green);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-registry:hover { background: var(--primary-green); color: white; border-color: var(--primary-green); }
+
+    /* Modal Popup */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+      padding: 15px;
+    }
+    .modal-content {
+      background: white; border-radius: 16px; max-width: 980px; width: 100%; max-height: 88vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      padding: 16px 20px; background: var(--accent-green);
+      border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-family: 'Prompt', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--primary-green); }
+    .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+    .modal-body { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+
+    .modal-botanical-info {
+      background: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px 18px; border-radius: 12px; font-size: 0.85rem; line-height: 1.6; color: #166534;
+    }
+
+    table.registry-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center;
+    }
+    table.registry-table th {
+      background: #f3f4f6; color: var(--text-main);
+      padding: 9px 6px; font-weight: 600; border: 1px solid var(--border-color);
+      position: sticky; top: 0;
+    }
+    table.registry-table td {
+      padding: 8px 6px; border: 1px solid var(--border-color); color: var(--text-main); vertical-align: middle;
+    }
+    table.registry-table tr:nth-child(even) { background: #f9fafb; }
+    .std-badge { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-block; margin: 1px; border: 1px solid #bae6fd; }
+
+    /* Dynamic Advice Box */
+    .advice-box {
+      background: #f0fdf4;
+      border-left: 4px solid var(--primary-green);
+      padding: 14px 18px; border-radius: 12px; margin-bottom: 5px; font-size: 0.9rem; color: #166534;
+    }
+
+    /* Credit Footer */
+    .credit-footer {
+      text-align: center; padding: 20px 15px; margin-top: 10px;
+      border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.88rem; line-height: 1.7;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f3f4f6; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="header-card">
+    <div class="header-title">
+      <h1>🌱 PCSHSCR BOTANICAL GARDEN</h1>
+      <p>สวนพฤกษศาสตร์ โรงเรียนวิทยาศาสตร์จุฬาภรณราชวิทยาลัย เชียงราย (Smart Botanical Dashboard)</p>
+      <div class="sensor-notice">📡 ข้อมูลความชื้นมาจาก: <strong>เครื่องวัดความชื้น DHT11</strong> (Digital Humidity Sensor)</div>
+    </div>
+    <div class="live-badge">
+      <div class="pulse-dot"></div>
+      LIVE MONITORING
+    </div>
+  </div>
+
+  <!-- Control Bar -->
+  <div class="control-bar">
+    <div class="date-picker-group">
+      <label for="dateSelect">📅 เลือกวันที่ดูข้อมูล:</label>
+      <select id="dateSelect" class="date-select" onchange="onDateChange()">
+        <option value="ALL">-- แสดงภาพรวมทุกวัน --</option>
+      </select>
+    </div>
+    <div class="btn-group">
+      <button class="btn-export" onclick="exportRegistryCSV()">📄 Export CSV (ทะเบียนพรรณไม้)</button>
+      <button class="btn-refresh" onclick="fetchSheetData()">🔄 ซิงค์ข้อมูลสด (Google Sheet)</button>
+    </div>
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="metrics-grid">
+    <div class="card">
+      <div class="metric-title">ความชื้นเฉลี่ย (เซ็นเซอร์ DHT11)</div>
+      <div class="metric-value" id="avg-humidity">-- %</div>
+      <div class="metric-status" id="avg-status" style="color: var(--primary-green);">--</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">สูงสุด / ต่ำสุด</div>
+      <div class="metric-value" id="min-max-humidity" style="font-size: 1.7rem; color: #0284c7;">-- / -- %</div>
+      <div class="metric-status" style="color: var(--text-muted);">ช่วงความผันผวนของวัน</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">จุดข้อมูลทั้งหมด</div>
+      <div class="metric-value" id="data-count">--</div>
+      <div class="metric-status" style="color: #d97706;">รายการบันทึก (ทุก 10 วิ)</div>
+    </div>
+    <div class="card">
+      <div class="metric-title">ดรรชนีความเหมาะสมพืช</div>
+      <div class="metric-value" id="match-score" style="color: #7c3aed;">-- %</div>
+      <div class="metric-status" style="color: var(--text-muted);" id="match-desc">จากพืชทั้งหมดในสวน</div>
+    </div>
+  </div>
+
+  <!-- Dynamic Advice Notice -->
+  <div class="advice-box" id="dynamic-advice">
+    💡 <strong>ข้อแนะนำการดูแลสวน:</strong> กำลังวิเคราะห์ข้อมูลความชื้นจากเครื่องวัด DHT11...
+  </div>
+
+  <!-- Main Chart & Daily Summary -->
+  <div class="main-grid">
+    <div class="card">
+      <div class="section-title">
+        <span id="graph-title">📊 กราฟวิเคราะห์ความชื้นเรียลไทม์ (DHT11 Sensor)</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="humidityChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span>📅 สรุปความชื้นรายวัน</span>
+      </div>
+      <div class="daily-list" id="daily-summary-container"></div>
+    </div>
+  </div>
+
+  <!-- Garden Aerial Map Card (From Google Drive) -->
+  <div class="card">
+    <div class="section-title">
+      <span>🗺️ แผนผังทางอากาศโซนพฤกษศาสตร์สวนสุขภาพ (Zones A - E)</span>
+    </div>
+    <div class="map-container" onclick="openMapModal()">
+      <img id="gardenMapImg" class="map-img" alt="ผังพื้นที่สวนสุขภาพ Zones A-E">
+      <div class="map-overlay-badge">🔍 คลิกเพื่อดูแผนที่ขนาดเต็ม</div>
+    </div>
+  </div>
+
+  <!-- Plant Evaluation by Zones -->
+  <div class="card">
+    <div class="section-title">
+      <span>🪴 ประเมินความเหมาะสมพืชตามโซนสุขภาพ & ทะเบียนพรรณไม้</span>
+    </div>
+
+    <div class="filter-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 ค้นหาชื่อพืช, รหัสพรรณไม้ หรือ รหัสนักเรียน (เช่น 101/1, 101-1)..." oninput="applyFilters()">
+      
+      <select id="zoneSelect" class="select-zone" onchange="applyFilters()">
+        <option value="ALL">📍 แสดงทุกโซนสุขภาพ</option>
+        <option value="สวนสุขภาพโซน A">โซน A</option>
+        <option value="สวนสุขภาพโซน B">โซน B</option>
+        <option value="สวนสุขภาพโซน C">โซน C</option>
+        <option value="สวนสุขภาพโซน D">โซน D</option>
+        <option value="สวนสุขภาพโซน E">โซน E</option>
+      </select>
+
+      <button class="filter-btn active" onclick="setFilter('ALL', this)">ทั้งหมด</button>
+      <button class="filter-btn" onclick="setFilter('HIGH', this)">🟢 เหมาะมาก</button>
+      <button class="filter-btn" onclick="setFilter('MEDIUM', this)">🟡 พอปลูกได้</button>
+      <button class="filter-btn" onclick="setFilter('LOW', this)">🔴 ไม่เหมาะ</button>
+    </div>
+
+    <div id="plant-evaluation-container"></div>
+  </div>
+
+  <!-- Credit Footer -->
+  <div class="credit-footer">
+    <p>🏫 <strong>โครงการสวนพฤกษศาสตร์โรงเรียน วิทยาศาสตร์จุฬาภรณราชวิทยาลัย เชียงราย (PCSHSCR)</strong></p>
+    <p>📡 <strong>อุปกรณ์ตรวจวัด:</strong> เซ็นเซอร์วัดความชื้น DHT11 (Digital Sensor System)</p>
+    <p>👨‍🏫 <strong>ครูผู้สอน:</strong> ครูสาธิต ธรรมขันทา</p>
+    <p style="margin-top: 4px;">
+      💻 <strong>กลุ่มพัฒนา ม.4/2:</strong> สมาชิกเลขที่ 2, 4, 5
+    </p>
+  </div>
+
+</div>
+
+<!-- Modal Popup for Plant Registry Details -->
+<div class="modal-overlay" id="registryModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modalPlantTitle">📋 รายละเอียดทะเบียนพรรณไม้</div>
+      <button class="close-modal" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-botanical-info" id="modalBotanicalDetail"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+        <span style="font-weight:700; color:var(--primary-green);">📌 รายการต้นไม้ในทะเบียน:</span>
+        <button onclick="window.print()" style="background:#e2e8f0; border:none; padding:4px 12px; border-radius:6px; cursor:pointer; font-family:'Prompt',sans-serif; font-size:0.8rem;">🖨️ พิมพ์การ์ดพฤกษศาสตร์</button>
+      </div>
+      <table class="registry-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">ลำดับ</th>
+            <th>รหัสพรรณไม้</th>
+            <th>บริเวณที่พบ</th>
+            <th>ม.1</th>
+            <th>ม.2</th>
+            <th>ม.3</th>
+            <th>ม.4</th>
+            <th>ม.5</th>
+            <th>ม.6</th>
+          </tr>
+        </thead>
+        <tbody id="modalTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Popup for Full-Size Map -->
+<div class="modal-overlay" id="mapModal">
+  <div class="modal-content" style="max-width:1100px;">
+    <div class="modal-header">
+      <div class="modal-title">🗺️ แผนผังทางอากาศแสดงขอบเขตสวนสุขภาพ (Zones A - E)</div>
+      <button class="close-modal" onclick="closeMapModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:10px; text-align:center; background:#111827;">
+      <img id="fullMapImg" style="max-width:100%; max-height:80vh; object-fit:contain; border-radius:8px;">
+    </div>
+  </div>
+</div>
+
+<script>
+  // ดึงภาพแผนผังทางอากาศโซน A-E จาก Google Drive ของคุณโดยตรง
+  const aerialMapSrc = 'https://lh3.googleusercontent.com/d/1maWKT6nw8w5Ry5mIcR6iYYI5oT-t6MRc';
+
+  const SHEET_ID = '1bL6t1v2GKdiPAVYiGAQieoWEpZrRTsW-r9QVLZ7GqkA';
+
+  let rawData = [];
+  let groupedByDate = {};
+  let chartInstance = null;
+  let currentFilter = 'ALL';
+  let currentAvgHumidity = 0;
+
+  // ฐานข้อมูลทะเบียนพรรณไม้ฉบับเต็มสมบูรณ์ 30 ชนิด พร้อมอิโมจิประจำสายพันธุ์
+  const fullPlantCatalog = {
+    'หางนกยูง': { local: 'หางนกยูง, ส้มพอหลวง, ชมพอหลวง, หงอนยูง', sci: 'Delonix regia (Bojer ex Hook.) Raf.', family: 'FABACEAE, CAESALPINIOIDEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เรือนยอดแผ่กว้างทรงกลมคล้ายร่ม ใบประกอบแบบขนนกสองชั้นปลายคู่ ดอกสีแดงจัดหรือสีส้มสด มีฝักแบนยาวสีน้ำตาลดำ', min: 40, max: 70, icon: '🌺' },
+    'ทุ่งฟ้า': { local: 'ทุ่งฟ้า, ทุ้งฟ้า', sci: 'Alstonia macrophylla', family: 'APOCYNACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกเรียบสีขาวอมเทา ใบเดี่ยวรูปไข่กลับหรือรูปหอกกลับ ดอกสีขาวหรือขาวอมเหลือง ออกเป็นช่อกระจุกแยกแขนงตามปลายกิ่ง', min: 45, max: 75, icon: '🌳' },
+    'จามจุรี': { local: 'จามจุรี, ก้ามปู, ฉำฉา, จามจุรีแดง', sci: 'Samanea saman (Jacq.) Merr.', family: 'FABACEAE, MIMOSOIDEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกลำต้นสีน้ำตาลเข้ม ผิวเปลือกขรุขระ แตกเป็นร่องลึกตามยาว มีใบประกอบแบบขนนกสองชั้น ดอกสีชมพูดูคล้ายพู่', min: 40, max: 75, icon: '🌳' },
+    'ตะเคียนทอง': { local: 'ตะเคียนทอง, จะเคียน, แคน', sci: 'Hopea odorata Roxb.', family: 'DIPTEROCARPACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกต้นหนาสีน้ำตาลเข้มหรือดำ แตกเป็นสะเก็ดลึกตามยาว มักมีคราบน้ำยางสีเหลืองแข็ง (ชันตะเคียน) ซึมออกมา', min: 55, max: 85, icon: '🌲' },
+    'ชมพู่น้ำดอกไม้': { local: 'ชมพู่น้ำดอกไม้, ฝรั่งน้ำ, มะซามุด, มะห้าคอกลอก', sci: 'Syzygium jambos (L.) Alston', family: 'MYRTACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกต้นสีน้ำตาลหรือเทาอมน้ำตาล ดอกออกเป็นช่อปลายกิ่ง กลีบดอกสีขาวหรือเหลืองอ่อน เกสรตัวผู้ยาวฟู ผลสุกสีขาวอมเหลือง', min: 60, max: 90, icon: '🍎' },
+    'ลิ้นจี่': { local: 'ลิ้นจี่, สีรามัน', sci: 'Litchi chinensis Sonn.', family: 'SAPINDACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'ใบประกอบแบบขนนกเรียงสลับ เปลือกผลแข็งและกรอบ ผิวขรุขระเป็นตุ่มหนาม เมื่อสุกสีแดงสดถึงแดงคล้ำ', min: 50, max: 75, icon: '🍒' },
+    'มะค่าโมง': { local: 'มะค่าโมง, มะค่าใหญ่, มะค่าหัวคำ', sci: 'Intsia bijuga', family: 'FABACEAE', habit: 'ไม้ต้น', location: 'โซน D ใกล้ต้นฉำฉ่า สวนสุขภาพ', feat: 'ไม้ต้นขนาดใหญ่ เปลือกสีเทาขรุขระ ใบประกอบแบบขนนก ฝักหนาแข็งเป็นรูปขอบขนานเมื่อแก่จะแตกเป็น 2 ซีก', min: 40, max: 70, icon: '🌰' },
+    'งิ้ว': { local: 'งิ้ว, งิ้วหนาม, งิ้วบ้าน, งิ้วแดง', sci: 'Bombax ceiba L.', family: 'MALVACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'ลำต้นมีหนามแหลมขนาดใหญ่กระจายอยู่ทั่วลำต้น ใบประกอบแบบนิ้วมือ ดอกเดี่ยวใหญ่สีแดง แสด หรือส้ม', min: 35, max: 65, icon: '🌺' },
+    'พิกุล': { local: 'พิกุล, แก้ว, กุน, ซางดง, พิกุลเขา', sci: 'Mimusops elengi L.', family: 'SAPOTACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกต้นสีน้ำตาลอมเทา มีรอยแตกตามยาว ดอกเดี่ยวหรือกระจุกตามง่ามใบ มีกลิ่นหอมเย็น กลีบดอกสีขาวอมเหลือง', min: 45, max: 75, icon: '🌼' },
+    'ขี้เหล็ก': { local: 'ขี้เหล็ก, ขี้เหล็กแก่น, ขี้เหล็กบ้าน, ขี้เหล็กหลวง', sci: 'Senna siamea (Lam.) Irwin & Barneby', family: 'FABACEAE, CAESALPINIOIDEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'ใบประกอบแบบขนนกเรียงสลับ ดอกช่อใหญ่สีเหลืองสดตามปลายกิ่ง ฝักแบนยาวสีน้ำตาล ทุกส่วนมีรสขม', min: 30, max: 60, icon: '🌿' },
+    'อินทนิลบก': { local: 'อินทนิลบก, กากะเลา, กาเสลา, จ้อล่อ', sci: 'Lagerstroemia macrocarpa Wall', family: 'LYTHRACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกต้นสีน้ำตาลเทา ใบเดี่ยว ดอกออกเป็นช่อปลายกิ่ง ขนาดใหญ่สีม่วงอมชมพู ผลแห้งขนาดใหญ่รูปไข่', min: 50, max: 80, icon: '🌸' },
+    'สักทอง': { local: 'สักทอง, สัก, สักหยอก, สักหิน', sci: 'Tectona grandis L.f.', family: 'LAMIACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกหนาสีเทาหรือน้ำตาลอ่อน โคนต้นมักมีพูพอน ใบเดี่ยวใหญ่หลังใบสากมือ เนื้อไม้สีเหลืองทองทนทาน', min: 40, max: 70, icon: '🪵' },
+    'ปาล์มหมากนวล': { local: 'ปาล์มหมากนวล, หมากนวล, หมากมะนิลา', sci: 'Adonidia merrillii (Becc.) Becc.', family: 'ARECACEAE', habit: 'ปาล์ม', location: 'สวนสุขภาพ', feat: 'ลำต้นตั้งตรง ผิวเรียบ ข้อปล้องชัด ยอดมีกาบใบหุ้มเรียกว่า "คอ" สีเขียวนวล ผลแก่หรือสุกสีแดงสด', min: 50, max: 80, icon: '🌴' },
+    'ราชพฤกษ์': { local: 'ราชพฤกษ์, คูน, ลมแล้ง', sci: 'Cassia fistula L.', family: 'FABACEAE, CAESALPINIOIDEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกสีน้ำตาลเทา ใบประกอบแบบขนนก ดอกออกเป็นช่อกระจะห้อยลงตามซอกใบ สีเหลืองสดใสสะพรั่งช่วงฤดูร้อน', min: 35, max: 65, icon: '🌼' },
+    'มะขามป้อม': { local: 'มะขามป้อม', sci: 'Phyllanthus emblica L.', family: 'PHYLLANTHACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกสีเทาอมน้ำตาลแตกเป็นร่องตามยาว ใบเดี่ยวเล็กเรียงชิดกันบนกิ่งย่อย ผลสดทรงกลมสีเขียวอมเหลือง', min: 30, max: 60, icon: '🍏' },
+    'ยางนา': { local: 'ยางนา, ยาง, ยางขาว, ยางแม่น้ำ', sci: 'Dipterocarpus alatus Roxb. ex G.Don', family: 'DIPTEROCARPACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกเรียบหนาสีเทาหรือเทาปนขาว โคนต้นมีพูพอน ใบเดี่ยวแผ่นใหญ่หนา ผลแห้งมีปีกยาว 2 ปีก ปีกสั้น 3 ปีก', min: 60, max: 85, icon: '🌲' },
+    'ปีบ': { local: 'ปีป, กาสะลอง, กาดสะลอง, เต็กตองโพ่', sci: 'Millingtonia hortensis L.f.', family: 'BIGNONIACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกหนาสีเทา/น้ำตาลอ่อน แตกเป็นร่องลึกตามยาว ดอกช่อใหญ่ปลายกิ่ง สีขาว/ชมพู กลิ่นหอมแรง', min: 40, max: 70, icon: '🌸' },
+    'เหลืองอินเดีย': { local: 'เหลืองอินเดีย, ตาเบเหลือง', sci: 'Handroanthus chrysanthus', family: 'BIGNONIACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกต้นสีน้ำตาลเทา ใบประกอบแบบนิ้วมือ 5 ใบย่อย ดอกสีเหลืองสดเป็นช่อกระจุกปลายกิ่ง', min: 35, max: 65, icon: '💛' },
+    'มะยม': { local: 'มะยม, หมากยม, หมักยม, บะยม', sci: 'Phyllanthus acidus (L.) Skeels.', family: 'PHYLLANTHACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกขรุขระค่อนข้างสากสีเทาปน ใบเดี่ยว ผลทรงกลมแบนเว้านูนเป็นพูรอบผลประมาณ 6-8 พู', min: 35, max: 65, icon: '🍒' },
+    'ชะมวง': { local: 'ชะมวง, ส้มโมง, ยอดมวง, กะมวง', sci: 'Garcinia cowa Roxb. ex Choisy', family: 'CLUSIACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกภายนอกสีน้ำตาลเข้มเกือบดำ ยอดอ่อนรสเปรี้ยวอมฝาด ผลสดทรงกลมแป้นสีเหลืองหรือส้ม', min: 50, max: 80, icon: '🍃' },
+    'ประดู่ป่า': { local: 'ประดู่ป่า, ดู่, ดู่ป่า, กะเลน', sci: 'Pterocarpus macrocarpus Kurz', family: 'FABACEAE, PAPILIONOIDEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกนอกสีน้ำตาลเข้มแตกเป็นสะเก็ดหนา ถากเปลือกชั้นในมีน้ำยางสีแดงสดคล้ายเลือด ผลเป็นฝักแห้งกลมแบน', min: 35, max: 65, icon: '🍁' },
+    'แคแสด': { local: 'แคแสด, แคแดง, ยามแดง', sci: 'Spathodea campanulata P.Beauv', family: 'BIGNONIACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกสีเทาอ่อนแตกเป็นร่องยาว ใบประกอบแบบขนนกปลายคี่ ดอกช่อตั้งใหญ่ปลายกิ่ง สีส้มสดถึงแดงอมส้ม', min: 45, max: 75, icon: '🌺' },
+    'สิบสองปันนา': { local: 'สิบสองปันนา, ปาล์มสิบสองปันนา', sci: 'Phoenix loureiroi Kunth', family: 'ARECACEAE', habit: 'ปาล์ม', location: 'สวนสุขภาพ', feat: 'ลำต้นขนาดเล็กมีกาบใบติดแน่นรอบลำต้น ใบประกอบแบบขนนกกระจุกปลายลำต้น ก้านใบมีหนาม', min: 50, max: 80, icon: '🌴' },
+    'ปาล์มจีน': { local: 'ปาล์มจีน, ปาล์มเซี่ยงไฮ้, ปาล์มพัด', sci: 'Livistona chinensis (Jacq.) R.Br. ex Mart', family: 'ARECACEAE', habit: 'ปาล์ม', location: 'สวนสุขภาพ', feat: 'เปลือกสีน้ำตาลผิวขรุขระมีรอยแผลกาบใบ ใบเดี่ยวรูปพัด ขอบเว้าลึกครึ่งแผ่นใบ ปลายแฉกแยกเป็นเส้นฝอย', min: 45, max: 75, icon: '🌴' },
+    'พุดซ้อน': { local: 'พุดซ้อน, พุดจีน, พุดใหญ่, เก็ดถวา', sci: 'Gardenia jasminoides J. Ellis', family: 'RUBIACEAE', habit: 'ไม้พุ่ม', location: 'สวนสุขภาพ', feat: 'ใบเดี่ยวตรงข้าม สีเขียวเข้มเป็นมัน ดอกเดี่ยวปลายกิ่ง/ซอกใบ กลีบดอกสีขาวซ้อนกันหลายชั้น กลิ่นหอมแรงนาน', min: 50, max: 80, icon: '🤍' },
+    'มะไฟ': { local: 'มะไฟ, ส้มไฟ, บ่าไฟ, บักไฟ', sci: 'Baccaurea ramiflora Lour.', family: 'PHYLLANTHACEAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกสีน้ำตาล/เทา ใบเดี่ยว ดอกช่อยาวเป็นกระจุกตามลำต้นและกิ่งแก่ ผลทรงกลม/รี สุกสีเหลือง ส้ม หรือแดง', min: 55, max: 80, icon: '🟡' },
+    'ติ้ว': { local: 'ติ้ว, ผักติ้ว, แต้ว, ติ้วขน', sci: 'Cratoxylum formosum (Jacq.) Benth. & Hook.f. ex Dyer', family: 'HYPERICACAE', habit: 'ไม้ต้น', location: 'สวนสุขภาพ', feat: 'เปลือกแตกล่อนเป็นสะเก็ด ใบเดี่ยว ใบอ่อนสีชมพูอ่อนหรือแดง ดอกช่อกระจุกตามซอกใบ สีชมพูหรือขาวอมชมพู', min: 35, max: 65, icon: '🌱' },
+    'เข็มแดง': { local: 'เข็มแดง, เข็ม', sci: 'Ixora spp.', family: 'RUBIACEAE', habit: 'ไม้พุ่ม', location: 'สวนสุขภาพ', feat: 'ใบเดี่ยว ดอกออกเป็นช่อกระจุกแน่นขนาดใหญ่บริเวณปลายยอด ดอกย่อยลักษณะเป็นหลอดยาว สีแดงสด', min: 45, max: 75, icon: '🔴' },
+    'ประทัดไต้หวัน': { local: 'ประทัดไต้หวัน, ประทัดฟิลิปปินส์, ประทัดทอง', sci: 'Hamelia patens Jacq', family: 'RUBIACEAE', habit: 'ไม้พุ่ม', location: 'สวนสุขภาพ', feat: 'ใบเดี่ยวรอบข้อ กิ่งอ่อนสีแดงอมน้ำตาล ดอกช่อกระจุกปลายกิ่ง รูปทรงหลอดยาว สีส้มอมแดง', min: 40, max: 70, icon: '🎆' },
+    'ผักตบชวา': { local: 'ผักตบชวา, ผักตบป่อง, สวะ, บัวลอย', sci: 'Eichhornia crassipes (Mart.) Solms', family: 'PONTEDERIACEAE', habit: 'ไม้ล้มลุก', location: 'สวนสุขภาพ', feat: 'ไม้น้ำอวบน้ำ รากฝอยยาวสีม่วงดำ ก้านใบพองออกตรงกลางภายในเป็นรูพรุน กลีบดอกสีม่วงอ่อนอมฟ้า', min: 80, max: 100, icon: '🪷' }
+  };
+
+  const zonePlantDatabase = {
+    'สวนสุขภาพโซน A': ['หางนกยูง', 'ทุ่งฟ้า', 'จามจุรี', 'ตะเคียนทอง', 'ชมพู่น้ำดอกไม้', 'ผักตบชวา'],
+    'สวนสุขภาพโซน B': ['จามจุรี', 'ตะเคียนทอง', 'ลิ้นจี่', 'งิ้ว', 'พิกุล', 'ขี้เหล็ก', 'อินทนิลบก', 'ปาล์มหมากนวล', 'แคแสด', 'มะไฟ'],
+    'สวนสุขภาพโซน C': ['จามจุรี', 'ตะเคียนทอง', 'มะค่าโมง', 'ปาล์มหมากนวล', 'มะขามป้อม', 'ยางนา', 'ติ้ว'],
+    'สวนสุขภาพโซน D': ['จามจุรี', 'ตะเคียนทอง', 'มะค่าโมง', 'อินทนิลบก', 'สักทอง', 'ราชพฤกษ์', 'ยางนา', 'ปีบ', 'เหลืองอินเดีย', 'มะยม'],
+    'สวนสุขภาพโซน E': ['ตะเคียนทอง', 'มะค่าโมง', 'ปาล์มหมากนวล', 'ราชพฤกษ์', 'ยางนา', 'เหลืองอินเดีย', 'ชะมวง', 'ประดู่ป่า', 'สิบสองปันนา', 'ปาล์มจีน', 'พุดซ้อน', 'เข็มแดง', 'ประทัดไต้หวัน']
+  };
+
+  const rawRegistryText = `17-57000-0003-001/001หางนกยูงสวนสุขภาพโซน A104/2204/12301/01402/17506/11601/01
+27-57000-0003-001/002หางนกยูงสวนสุขภาพโซน A104/5203/19301/02402/01501/05601/02
+37-57000-0003-001/003หางนกยูงสวนสุขภาพโซน A102/09204/14301/03404/13505/16601/03
+47-57000-0003-001/004หางนกยูงสวนสุขภาพโซน A102/12201/21301/04401/21502/07601/04
+57-57000-0003-001/005หางนกยูงสวนสุขภาพโซน A103/2204/15301/05402/13502/11601/05
+67-57000-0003-001/006หางนกยูงสวนสุขภาพโซน A101/16204/01301/06403/13501/17601/06
+77-57000-0003-001/007หางนกยูงสวนสุขภาพโซน A101/22201/14301/07402/10601/07
+87-57000-0003-001/008หางนกยูงสวนสุขภาพโซน A104/24203/15301/08405/04501/21601/08
+97-57000-0003-001/009หางนกยูงสวนสุขภาพโซน A101/12202/22301/09405/02505/10601/09
+107-57000-0003-001/010หางนกยูงสวนสุขภาพโซน A103/15204/23301/10406/12502/09601/10
+117-57000-0003-001/011หางนกยูงสวนสุขภาพโซน A101/09204/17301/11401/24504/21601/11
+127-57000-0003-001/0012หางนกยูงสวนสุขภาพโซน A101/08204/20301/12403/23503/11601/12
+137-57000-0003-001/013หางนกยูงสวนสุขภาพโซน A103/01202/02301/13404/11505-20601/13
+147-57000-0003-001/014หางนกยูงสวนสุขภาพโซน A104/09201/17301/14405/23503/03601/14
+157-57000-0003-001/015หางนกยูงสวนสุขภาพโซน A103/18201/22301/15406/9503/09601/15
+167-57000-0003-002/001ทุ่งฟ้าสวนสุขภาพโซน A104/01202/20301/16404/07601/16
+177-57000-0003-003/001จามจุรีสวนสุขภาพโซน A102/16203/22301/17405/22502/01601/17
+187-57000-0003-003/002จามจุรีสวนสุขภาพโซน A101/13203/11301/18405/20503/21601/18
+197-57000-0003-003/003จามจุรีสวนสุขภาพโซน A101/5203/17301/19405/17506/02601/19
+207-57000-0003-003/004จามจุรีสวนสุขภาพโซน A103/20202/14301/20403/05506/06601/20
+217-57000-0003-003/005จามจุรีสวนสุขภาพโซน A301/21401/20501/08601/21
+227-57000-0003-003/006จามจุรีสวนสุขภาพโซน A101/04203/01301/22404/12502/04601/22
+237-57000-0003-003/007จามจุรีสวนสุขภาพโซน B--403/01505/13605/10
+247-57000-0003-003/008จามจุรีสวนสุขภาพโซน C-401/17502/13606/23
+257-57000-0003-003/009จามจุรีสวนสุขภาพโซน D104/15203/12301/23406/14505/05601/23
+267-57000-0003-004/001ตะเคียนทองสวนสุขภาพโซน A301/24402/11502/21604/11
+277-57000-0003-004/002ตะเคียนทองสวนสุขภาพโซน A102/17204/19302/01402/06505/22602/01
+287-57000-0003-004/003ตะเคียนทองสวนสุขภาพโซน A302/02403/02504/08602/02
+297-57000-0003-004/004ตะเคียนทองสวนสุขภาพโซน A102/4202/11302/03403/10501/02602/03
+307-57000-0003-004/005ตะเคียนทองสวนสุขภาพโซน A201/06302/04405/13503/24602/04
+317-57000-0003-004/006ตะเคียนทองสวนสุขภาพโซน B102/03202/18302/05406/01504/20602/05
+327-57000-0003-004/007ตะเคียนทองสวนสุขภาพโซน B101/01202/04302/06406/03504/14602/06
+337-57000-0003-004/008ตะเคียนทองสวนสุขภาพโซน B104/12201/15302/07401/01501/10602/07
+347-57000-0003-004/009ตะเคียนทองสวนสุขภาพโซน B103/4201/9302/08404/14501/09602/08
+357-57000-0003-004/010ตะเคียนทองสวนสุขภาพโซน B103/13202/15302/09403/04501/14602/09
+367-57000-0003-004/011ตะเคียนทองสวนสุขภาพโซน B104/18201/18302/10406/10504/16602/10
+377-57000-0003-004/012ตะเคียนทองสวนสุขภาพโซน B203/02302/11404/23506/07602/11
+387-57000-0003-004/013ตะเคียนทองสวนสุขภาพโซน B104/10201/10302/12405/11502/12602/12
+397-57000-0003-004/014ตะเคียนทองสวนสุขภาพโซน B104/08204/03302/13401/05506/12602/13
+407-57000-0003-004/015ตะเคียนทองสวนสุขภาพโซน B104/11203/10302/14404/18505/24602/14
+417-57000-0003-004/016ตะเคียนทองสวนสุขภาพโซน B101/17201/08302/15402/08506/24602/15
+427-57000-0003-004/017ตะเคียนทองสวนสุขภาพโซน B101/21202/10302/16403/14506/18602/16
+437-57000-0003-004/018ตะเคียนทองสวนสุขภาพโซน B102/19204/13302/17404/04506/15602/17
+447-57000-0003-004/019ตะเคียนทองสวนสุขภาพโซน B104/13204/10302/18401/10505/21602/18
+457-57000-0003-004/020ตะเคียนทองสวนสุขภาพโซน C102/11203/24 204/06302/19406/17505/04602/19
+467-57000-0003-004/021ตะเคียนทองสวนสุขภาพโซน C101/24203/20302/20402/24504/01602/20
+477-57000-0003-004/022ตะเคียนทองสวนสุขภาพโซน C104/23201/13302/21404/20504/23602/21
+487-57000-0003-004/023ตะเคียนทองสวนสุขภาพโซน C302/22403/15501/15602/22
+497-57000-0003-004/024ตะเคียนทองสวนสุขภาพโซน C103/08201/01302/23404/17502/18602/23
+507-57000-0003-004/025ตะเคียนทองสวนสุขภาพโซน C103/22201/4302/24405/16503/20602/24
+517-57000-0003-004/026ตะเคียนทองสวนสุขภาพโซน C103/05201/19303/01406-07503_01603/01
+527-57000-0003-004/027ตะเคียนทองสวนสุขภาพโซน C101/22202/07303/02406/24503-17603/02
+537-57000-0003-004/028ตะเคียนทองสวนสุขภาพโซน D102/21201/5303/03401/19506/17603/03
+547-57000-0003-004/029ตะเคียนทองสวนสุขภาพโซน D203/6303/04403/18502/19603/04
+557-57000-0003-004/030ตะเคียนทองสวนสุขภาพโซน D104/03204/24303/05406/18505/14603/05
+567-57000-0003-004/031ตะเคียนทองสวนสุขภาพโซน D102/10202/01303/06401/22502-02603/06
+577-57000-0003-004/032ตะเคียนทองสวนสุขภาพโซน D103/6202/23303/07406/19501/23603/07
+587-57000-0003-004/033ตะเคียนทองสวนสุขภาพโซน D101/03202/8303/08402/14505/06603/08
+597-57000-0003-004/034ตะเคียนทองสวนสุขภาพโซน E103/21204/18303/09403/12504/03603/09
+607-57000-0003-004/035ตะเคียนทองสวนสุขภาพโซน E103/03203/09303/10603/10
+617-57000-0003-004/036ตะเคียนทองสวนสุขภาพโซน E101/02203/21303/11406/16504/02603/11
+627-57000-0003-004/037ตะเคียนทองสวนสุขภาพโซน E104/14204/05303/12401/02603/12
+637-57000-0003-004/038ตะเคียนทองสวนสุขภาพโซน E201/16303/13402/16506/01603/13
+647-57000-0003-004/039ตะเคียนทองสวนสุขภาพโซน E102/14202/16303/14403/09506/19603/14
+657-57000-0003-005/001ชมพู่น้ำดอกไม้สวนสุขภาพโซน A101/15204/08303/15403/22504/15603/15
+667-57000-0003-006/001ลิ้นจี่สวนสุขภาพโซน B103/07202/17303/16404/08506/05603/16
+677-57000-0003-007/001มะค่าโมงสวนสุขภาพโซน C103/16201/24303/17406/22501/01603/17
+687-57000-0003-007/002มะค่าโมงสวนสุขภาพโซน D-402/21501/06606/21
+697-57000-0003-007/003มะค่าโมงสวนสุขภาพโซน E-406/02502/06606/22
+707-57000-0003-008/001งิ้วสวนสุขภาพโซน B102/20203/14303/18403/20502/15603/18
+717-57000-0003-009/001พิกุลสวนสุขภาพโซน B103/19202/21303/19403/08503/06603/19
+727-57000-0003-009/002พิกุลสวนสุขภาพโซน B103/24201/02303/20405/12506/10603/20
+737-57000-0003-009/003พิกุลสวนสุขภาพโซน B102/05203/03303/21406/04506/23603/21
+747-57000-0003-009/004พิกุลสวนสุขภาพโซน B103/23204/16303/22406/15504/05603/22
+757-57000-0003-009/005พิกุลสวนสุขภาพโซน B104/07204/11303/23401/12503/10603/23
+767-57000-0003-010/001ขี้เหล็กสวนสุขภาพโซน B103/14202/09303/24405/05503/05603/24
+777-57000-0003-011/001อินทนิลบกสวนสุขภาพโซน B103/12201/03304/01406/13504/09604/01
+787-57000-0003-011/002อินทนิลบกสวนสุขภาพโซน B101/07202/05304/02404/06504/10604/02
+797-57000-0003-011/003อินทนิลบกสวนสุขภาพโซน D104/16201/12304/03406/11502/03604/03
+807-57000-0003-012/001สักทองสวนสุขภาพโซน D104/19204/22304/05405/03503/18604/05
+817-57000-0003-013/001ปาล์มหมากนวลสวนสุขภาพโซน B103/17203/08304/06403/06502/22604/06
+827-57000-0003-013/002ปาล์มหมากนวลสวนสุขภาพโซน B101/10203/7304/07403/07503/13604/07
+837-57000-0003-013/003ปาล์มหมากนวลสวนสุขภาพโซน C102/7203/16304/08401/15501/04604/08
+847-57000-0003-013/004ปาล์มหมากนวลสวนสุขภาพโซน C101/23202/06304/09401/18503/22604/09
+857-57000-0003-013/005ปาล์มหมากนวลสวนสุขภาพโซน E101/18203/13304/10406/06502/20604/10
+867-57000-0003-014/001ราชพฤกษ์สวนสุขภาพโซน D-405/07506/04606/24
+877-57000-0003-014/002ราชพฤกษ์สวนสุขภาพโซน D102/01204/02304/11405/14503/15604/11
+887-57000-0003-014/003ราชพฤกษ์สวนสุขภาพโซน E203/23304/12404/05505/12604/12
+897-57000-0003-015/001มะขามป้อมสวนสุขภาพโซน C101/19204/07304/13405/06604/13
+907-57000-0003-016/001ยางนาสวนสุขภาพโซน C101/23202/12304/14406/21506/13604/14
+917-57000-0003-016/002ยางนาสวนสุขภาพโซน C101/20202/19304/15404/02503/12604/15
+927-57000-0003-016/003ยางนาสวนสุขภาพโซน C102/23304/16405/10505/11604/16
+937-57000-0003-016/004ยางนาสวนสุขภาพโซน C101/11202/03304/17406/23504/19604/17
+947-57000-0003-016/005ยางนาสวนสุขภาพโซน D104/16201/11304/18404/09502/08604/18
+957-57000-0003-016/006ยางนาสวนสุขภาพโซน D104/22201/23304/19405/21504/18604/19
+967-57000-0003-016/007ยางนาสวนสุขภาพโซน D102/02201/07304/20402/22505/8604/20
+977-57000-0003-016/008ยางนาสวนสุขภาพโซน D104/04203/05304/21403/16604/21
+987-57000-0003-016/009ยางนาสวนสุขภาพโซน D102/15204/04304/22401/16506/20604/22
+997-57000-0003-016/010ยางนาสวนสุขภาพโซน D102/08204/21304/23402/15502/23604/23
+1007-57000-0003-016/011ยางนาสวนสุขภาพโซน D104/20203/4304/24401/23502/24604/24
+1017-57000-0003-016/012ยางนาสวนสุขภาพโซน D-402/03503/02605/01
+1027-57000-0003-016/013ยางนาสวนสุขภาพโซน D-505/02605/02
+1037-57000-0003-016/014ยางนาสวนสุขภาพโซน E-402/09502/10605/03
+1047-57000-0003-016/015ยางนาสวนสุขภาพโซน E-402/20504/06605/04
+1057-57000-0003-016/016ยางนาสวนสุขภาพโซน E-402/23502/17605/05
+1067-57000-0003-016/017ยางนาสวนสุขภาพโซน E-406/20506/03605/06
+1077-57000-0003-016/018ยางนาสวนสุขภาพโซน E-402/04505/09605/07
+1087-57000-0003-017/001ปีปสวนสุขภาพโซน D-404/24506/22605/08
+1097-57000-0003-018/001เหลืองอินเดียสวนสุขภาพโซน D-401/08506/14605/09
+1107-57000-0003-018/002เหลืองอินเดียสวนสุขภาพโซน D-403/03504/22605/11
+1117-57000-0003-018/003เหลืองอินเดียสวนสุขภาพโซน D-506/16605/12
+1127-57000-0003-018/004เหลืองอินเดียสวนสุขภาพโซน D-403/24501/16605/13
+1137-57000-0003-018/005เหลืองอินเดียสวนสุขภาพโซน D-401/07605/14
+1147-57000-0003-018/006เหลืองอินเดียสวนสุขภาพโซน D-404/03501/20605/15
+1157-57000-0003-018/007เหลืองอินเดียสวนสุขภาพโซน E-405/01504/12605/16
+1167-57000-0003-018/008เหลืองอินเดียสวนสุขภาพโซน E-402/18505/18605/17
+1177-57000-0003-018/009เหลืองอินเดียสวนสุขภาพโซน E-403/19503/14605/18
+1187-57000-0003-018/010เหลืองอินเดียสวนสุขภาพโซน E-402/02503/08604/04
+1197-57000-0003-018/011เหลืองอินเดียสวนสุขภาพโซน E-403/21503/07605/19
+1207-57000-0003-018/012เหลืองอินเดียสวนสุขภาพโซน E-404/10504/17605/20
+1217-57000-0003-018/013เหลืองอินเดียสวนสุขภาพโซน E-404/22506/09605/21
+1227-57000-0003-018/014เหลืองอินเดียสวนสุขภาพโซน E-401/14506/21605/22
+1237-57000-0003-018/015เหลืองอินเดียสวนสุขภาพโซน E-401/04605/23
+1247-57000-0003-018/016เหลืองอินเดียสวนสุขภาพโซน E-404/15503/23605/24
+1257-57000-0003-018/017เหลืองอินเดียสวนสุขภาพโซน E-402/07504/4606/01
+1267-57000-0003-018/018เหลืองอินเดียสวนสุขภาพโซน E-401/03606/02
+1277-57000-0003-019/001มะยมสวนสุขภาพโซน D-405/08502_16606/03
+1287-57000-0003-020/001ชะมวงสวนสุขภาพโซน E-402/19501/24606/04
+1297-57000-0003-021/001ประดู่ป่าสวนสุขภาพโซน E-404/16505/07606/05
+1307-57000-0003-022/001แคแสดสวนสุขภาพโซน B-405/24506/08606/06
+1317-57000-0003-023/001สิบสองปันนาสวนสุขภาพโซน E-402/12504/24606/07
+1327-57000-0003-024/001ปาล์มจีนสวนสุขภาพโซน E-404/01505/03606/08
+1337-57000-0003-024/002ปาล์มจีนสวนสุขภาพโซน E-405/18505/01606/09
+1347-57000-0003-024/003ปาล์มจีนสวนสุขภาพโซน E-406/08505/17606/10
+1357-57000-0003-024/004ปาล์มจีนสวนสุขภาพโซน E-401/06502/05606/11
+1367-57000-0003-024/005ปาล์มจีนสวนสุขภาพโซน E-405/19501/18606/12
+1377-57000-0003-025/001พุดซ้อนสวนสุขภาพโซน E-401/11505/19606/13
+1387-57000-0003-026/001มะไฟสวนสุขภาพโซน B102/06202/13304/04405/15501/07606/14
+1397-57000-0003-027/001ติ้วสวนสุขภาพโซน C-401/13501/19606/15
+1407-57000-0003-028/001เข็มแดงสวนสุขภาพโซน E-402/05501/03606/16
+1417-57000-0003-029/001ประทัดไต้หวันสวนสุขภาพโซน E-403/17501/12606/17
+1427-57000-0003-030/001ผักตบชวาสวนสุขภาพโซน A-401/09501/22606/18
+1437-57000-0003-030/002ผักตบชวาสวนสุขภาพโซน A-405/09502/14606/19
+1447-57000-0003-030/003ผักตบชวาสวนสุขภาพโซน A-404/21503/19606/20`;
+
+  let plantRegistryDatabase = [];
+
+  function formatStudentCode(code) {
+    if (!code || code === '-') return '-';
+    return code.replace(/^(\d{3})\/0*(\d+)$/, '$1-$2');
+  }
+
+  function parseStudentGrades(rawStr) {
+    let grades = { m1: '-', m2: '-', m3: '-', m4: '-', m5: '-', m6: '-' };
+    if (!rawStr || rawStr === '-') return grades;
+
+    const matches = rawStr.match(/([1-6])(\d{2})\/(\d{1,2})/g);
+    if (matches) {
+      matches.forEach(code => {
+        const formatted = formatStudentCode(code);
+        const gradeNum = code.charAt(0);
+        if (gradeNum === '1') grades.m1 = grades.m1 === '-' ? formatted : grades.m1 + ', ' + formatted;
+        if (gradeNum === '2') grades.m2 = grades.m2 === '-' ? formatted : grades.m2 + ', ' + formatted;
+        if (gradeNum === '3') grades.m3 = grades.m3 === '-' ? formatted : grades.m3 + ', ' + formatted;
+        if (gradeNum === '4') grades.m4 = grades.m4 === '-' ? formatted : grades.m4 + ', ' + formatted;
+        if (gradeNum === '5') grades.m5 = grades.m5 === '-' ? formatted : grades.m5 + ', ' + formatted;
+        if (gradeNum === '6') grades.m6 = grades.m6 === '-' ? formatted : grades.m6 + ', ' + formatted;
+      });
+    }
+    return grades;
+  }
+
+  function parseRegistryData() {
+    const lines = rawRegistryText.trim().split('\n');
+    lines.forEach(line => {
+      const match = line.match(/^(\d+)(7-57000-0003-[\d\/\-]+)([ก-๙A-Za-z\s]+)(สวนสุขภาพโซน\s*[A-E])(.*)$/);
+      if (match) {
+        const id = match[1];
+        const code = match[2];
+        const name = match[3].trim();
+        const zone = match[4].trim();
+        const rawStudents = match[5].trim();
+        const grades = parseStudentGrades(rawStudents);
+
+        plantRegistryDatabase.push({
+          id: id,
+          code: code,
+          name: name,
+          zone: zone,
+          rawStudents: rawStudents,
+          grades: grades
+        });
+      }
+    });
+  }
+
+  function fetchSheetData() {
+    const oldScript = document.getElementById('jsonp-script');
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement('script');
+    script.id = 'jsonp-script';
+    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetData`;
+    
+    script.onerror = function() {
+      alert('ไม่สามารถดึงข้อมูลสดได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+    };
+    
+    document.body.appendChild(script);
+  }
+
+  function handleSheetData(response) {
+    if (!response || !response.table || !response.table.rows) return;
+
+    const rows = response.table.rows;
+    rawData = [];
+    groupedByDate = {};
+
+    rows.forEach(row => {
+      if (!row.c) return;
+      
+      const timeCell = row.c[0];
+      const humCell = row.c[1];
+
+      if (timeCell && humCell && humCell.v !== null && humCell.v !== undefined) {
+        const fullTimeStr = (timeCell.f || timeCell.v.toString()).trim();
+        const datePart = fullTimeStr.split(',')[0].split(' ')[0];
+        const humVal = parseFloat(humCell.v);
+
+        if (datePart && !isNaN(humVal)) {
+          const record = { time: fullTimeStr, date: datePart, humidity: humVal };
+          rawData.push(record);
+
+          if (!groupedByDate[datePart]) {
+            groupedByDate[datePart] = [];
+          }
+          groupedByDate[datePart].push(record);
+        }
+      }
+    });
+
+    populateDateSelector();
+    renderDailySummaryList();
+    
+    const dates = Object.keys(groupedByDate);
+    if (dates.length > 0) {
+      const latestDate = dates[dates.length - 1];
+      document.getElementById('dateSelect').value = latestDate;
+      updateDashboardView(latestDate);
+    }
+  }
+
+  function populateDateSelector() {
+    const select = document.getElementById('dateSelect');
+    select.innerHTML = '<option value="ALL">-- แสดงภาพรวมทุกวัน --</option>';
+
+    Object.keys(groupedByDate).forEach(date => {
+      const option = document.createElement('option');
+      option.value = date;
+      option.innerText = `วันที่ ${date}`;
+      select.appendChild(option);
+    });
+  }
+
+  function renderDailySummaryList() {
+    const container = document.getElementById('daily-summary-container');
+    container.innerHTML = '';
+
+    Object.keys(groupedByDate).forEach(date => {
+      const items = groupedByDate[date];
+      const avg = (items.reduce((sum, item) => sum + item.humidity, 0) / items.length).toFixed(1);
+
+      const div = document.createElement('div');
+      div.className = 'daily-item';
+      div.onclick = () => {
+        document.getElementById('dateSelect').value = date;
+        updateDashboardView(date);
+      };
+
+      div.innerHTML = `
+        <div class="daily-date">📅 วันที่ ${date}</div>
+        <div class="daily-avg">${avg}%</div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function onDateChange() {
+    const selectedDate = document.getElementById('dateSelect').value;
+    updateDashboardView(selectedDate);
+  }
+
+  function updateDashboardView(selectedDate) {
+    let filteredData = [];
+    
+    if (selectedDate === 'ALL') {
+      filteredData = rawData;
+      document.getElementById('graph-title').innerText = '📊 แนวโน้มความชื้น (ภาพรวมทั้งหมด - DHT11)';
+    } else {
+      filteredData = groupedByDate[selectedDate] || [];
+      document.getElementById('graph-title').innerText = `📊 ระดับความชื้นรายเวลา (วันที่ ${selectedDate} - DHT11)`;
+    }
+
+    if (filteredData.length === 0) return;
+
+    const values = filteredData.map(d => d.humidity);
+    const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    document.getElementById('avg-humidity').innerText = `${avg} %`;
+    document.getElementById('min-max-humidity').innerText = `${min} / ${max} %`;
+    document.getElementById('data-count').innerText = `${filteredData.length} รายการ`;
+
+    currentAvgHumidity = parseFloat(avg);
+    
+    const statusElem = document.getElementById('avg-status');
+    const adviceElem = document.getElementById('dynamic-advice');
+
+    if (currentAvgHumidity < 35) { 
+      statusElem.innerText = '🏜️ ดินแห้งเกินไป'; 
+      statusElem.style.color = '#dc2626';
+      adviceElem.innerHTML = '💡 <strong>คำแนะนำดูแลสวน (DHT11):</strong> ความชื้นต่ำ ควรเปิดระบบรดน้ำเพิ่ม เหมาะสมกับพืชทนแล้ง เช่น มะขามป้อม ขี้เหล็ก และราชพฤกษ์';
+    } else if (currentAvgHumidity <= 70) { 
+      statusElem.innerText = '🌿 ดินชุ่มชื้นสมบูรณ์'; 
+      statusElem.style.color = '#15803d';
+      adviceElem.innerHTML = '💡 <strong>คำแนะนำดูแลสวน (DHT11):</strong> ระดับความชื้นเหมาะสมกับการเจริญเติบโตของไม้ยืนต้นส่วนใหญ่ เช่น สักทอง จามจุรี ลิ้นจี่ และพิกุล';
+    } else { 
+      statusElem.innerText = '🌊 ดินชุ่มน้ำสูง'; 
+      statusElem.style.color = '#0284c7';
+      adviceElem.innerHTML = '💡 <strong>คำแนะนำดูแลสวน (DHT11):</strong> ความชื้นสะสมสูง ควรระวังน้ำขัง เหมาะกับพืชชอบน้ำ เช่น ผักตบชวา ชมพู่น้ำดอกไม้ และยางนา';
+    }
+
+    renderChart(filteredData);
+    applyFilters();
+  }
+
+  function renderChart(dataItems) {
+    const ctx = document.getElementById('humidityChart').getContext('2d');
+    
+    const labels = dataItems.map(d => {
+      if (d.time.includes(',')) return d.time.split(',')[1].trim();
+      if (d.time.includes(' ')) return d.time.split(' ')[1].trim();
+      return d.time;
+    });
+    
+    const values = dataItems.map(d => d.humidity);
+
+    if (chartInstance) chartInstance.destroy();
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+    gradient.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'ความชื้น (%)',
+          data: values,
+          borderColor: '#15803d',
+          borderWidth: 2.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.3,
+          pointRadius: values.length > 100 ? 0 : 3,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#22c55e'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 100, grid: { color: '#e5e7eb' }, ticks: { color: '#6b7280' } },
+          x: { grid: { display: false }, ticks: { color: '#6b7280', maxTicksLimit: 12 } }
+        }
+      }
+    });
+  }
+
+  function setFilter(filterType, btn) {
+    currentFilter = filterType;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function parseSearchQuery(query) {
+    let clean = query.trim().toLowerCase();
+    
+    let match = clean.match(/^(?:4)?(\d{3})[\/\s\-]+0*(\d+)$/);
+    if (match) {
+      return {
+        isRoomNoSearch: true,
+        room: match[1],
+        no: parseInt(match[2], 10)
+      };
+    }
+
+    return {
+      isRoomNoSearch: false,
+      text: clean
+    };
+  }
+
+  function applyFilters() {
+    const rawInput = document.getElementById('searchInput').value;
+    const selectedZone = document.getElementById('zoneSelect').value;
+    const searchParsed = parseSearchQuery(rawInput);
+    
+    const container = document.getElementById('plant-evaluation-container');
+    container.innerHTML = '';
+
+    let totalPlantsCount = 0;
+    let matchedHighCount = 0;
+
+    Object.keys(zonePlantDatabase).forEach(zoneName => {
+      if (selectedZone !== 'ALL' && zoneName !== selectedZone) return;
+
+      const plantNamesList = zonePlantDatabase[zoneName];
+      let zoneHTML = '';
+
+      plantNamesList.forEach(plantName => {
+        const plant = fullPlantCatalog[plantName] || { local: plantName, sci: '', family: '', habit: 'ไม้ต้น', location: zoneName, feat: '', min: 40, max: 80, icon: '🪴' };
+        totalPlantsCount++;
+
+        let statusKey = 'LOW';
+        let badgeClass = 'badge-low';
+        let badgeText = 'ไม่เหมาะ';
+
+        if (currentAvgHumidity >= plant.min && currentAvgHumidity <= plant.max) {
+          statusKey = 'HIGH';
+          badgeClass = 'badge-high';
+          badgeText = '🟢 เหมาะมาก';
+          matchedHighCount++;
+        } else if (Math.abs(currentAvgHumidity - plant.min) <= 10 || Math.abs(currentAvgHumidity - plant.max) <= 10) {
+          statusKey = 'MEDIUM';
+          badgeClass = 'badge-medium';
+          badgeText = '🟡 พอปลูกได้';
+        }
+
+        const matchingRecords = plantRegistryDatabase.filter(r => 
+          r.name.includes(plantName) && r.zone.trim() === zoneName.trim()
+        );
+
+        let hasMatchingRegistry = false;
+
+        if (rawInput.trim() !== '') {
+          hasMatchingRegistry = matchingRecords.some(r => {
+            const rawStdClean = r.rawStudents.toLowerCase();
+            const codeClean = r.code.toLowerCase();
+            const nameClean = r.name.toLowerCase();
+
+            if (searchParsed.isRoomNoSearch) {
+              const stdPattern = new RegExp(searchParsed.room + '[-/]' + searchParsed.no + '(?:\\b|\\D)');
+              const stdPatternZero = new RegExp(searchParsed.room + '[-/]0' + searchParsed.no + '(?:\\b|\\D)');
+              
+              const gradesStr = Object.values(r.grades).join(' ');
+              return stdPattern.test(rawStdClean) || stdPatternZero.test(rawStdClean) ||
+                     stdPattern.test(gradesStr) || stdPatternZero.test(gradesStr);
+            } else {
+              const searchText = searchParsed.text;
+              return codeClean.includes(searchText) ||
+                     nameClean.includes(searchText) ||
+                     rawStdClean.includes(searchText) ||
+                     Object.values(r.grades).join(' ').toLowerCase().includes(searchText);
+            }
+          });
+        }
+
+        const matchesSearch = rawInput.trim() === '' || 
+                              plantName.toLowerCase().includes(rawInput.toLowerCase().trim()) || 
+                              plant.local.toLowerCase().includes(rawInput.toLowerCase().trim()) || 
+                              plant.sci.toLowerCase().includes(rawInput.toLowerCase().trim()) || 
+                              plant.family.toLowerCase().includes(rawInput.toLowerCase().trim()) || 
+                              hasMatchingRegistry;
+
+        const matchesFilter = (currentFilter === 'ALL') || (currentFilter === statusKey);
+
+        if (matchesSearch && matchesFilter) {
+          const regCount = matchingRecords.length;
+
+          zoneHTML += `
+            <div class="plant-card">
+              <div class="plant-icon-banner">
+                ${plant.icon}
+              </div>
+              <div class="plant-body">
+                <div class="plant-header-row">
+                  <div>
+                    <div class="plant-name">${plantName}</div>
+                    <div class="local-names">${plant.local}</div>
+                    <div class="sci-name">${plant.sci}</div>
+                  </div>
+                  <span class="badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="plant-detail-info">
+                  <b>วงศ์:</b> ${plant.family} | <b>วิสัย:</b> ${plant.habit}<br>
+                  <b>จุดเด่น:</b> ${plant.feat}
+                </div>
+                <button class="btn-registry" onclick="openRegistryModal('${plantName}', '${zoneName}')">
+                  📋 ทะเบียนพรรณไม้ (${regCount} ต้น)
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      if (zoneHTML !== '') {
+        const zoneBlock = document.createElement('div');
+        zoneBlock.className = 'zone-block';
+        zoneBlock.innerHTML = `
+          <div class="zone-header">📍 ${zoneName}</div>
+          <div class="plant-grid">${zoneHTML}</div>
+        `;
+        container.appendChild(zoneBlock);
+      }
+    });
+
+    if (container.innerHTML === '') {
+      container.innerHTML = '<div style="text-align:center; color:#6b7280; padding:30px;">ไม่พบรายการพืชหรือรหัสนักเรียนที่ตรงกับเงื่อนไข</div>';
+    }
+
+    const scorePercent = totalPlantsCount > 0 ? Math.round((matchedHighCount / totalPlantsCount) * 100) : 0;
+    document.getElementById('match-score').innerText = `${scorePercent}%`;
+    document.getElementById('match-desc').innerText = `เหมาะมาก ${matchedHighCount} จาก ${totalPlantsCount} ชนิด`;
+  }
+
+  function openRegistryModal(plantName, zoneName) {
+    const modal = document.getElementById('registryModal');
+    const title = document.getElementById('modalPlantTitle');
+    const botanicalBox = document.getElementById('modalBotanicalDetail');
+    const tableBody = document.getElementById('modalTableBody');
+
+    const plant = fullPlantCatalog[plantName] || { local: plantName, sci: '', family: '', habit: 'ไม้ต้น', location: zoneName, feat: '' };
+
+    title.innerText = `📋 ทะเบียนพรรณไม้: ${plantName} (${zoneName})`;
+    
+    botanicalBox.innerHTML = `
+      <b>🌿 ชื่อพื้นเมือง:</b> ${plant.local}<br>
+      <b>🧬 ชื่อวิทยาศาสตร์:</b> <i>${plant.sci}</i> | <b>ชื่อวงศ์:</b> ${plant.family}<br>
+      <b>🌱 ลักษณะวิสัย:</b> ${plant.habit} | <b>บริเวณที่พบ:</b> ${plant.location}<br>
+      <b>⭐ ลักษณะเด่น:</b> ${plant.feat}
+    `;
+
+    tableBody.innerHTML = '';
+
+    const records = plantRegistryDatabase.filter(r => 
+      r.name.includes(plantName) && r.zone.trim() === zoneName.trim()
+    );
+
+    if (records.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#6b7280;">ไม่พบข้อมูลทะเบียนรหัสพรรณไม้สำหรับพื้นที่นี้</td></tr>';
+    } else {
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        
+        const fmtStd = (str) => {
+          if (!str || str === '-') return '-';
+          return str.split(', ').map(s => `<span class="std-badge">${s}</span>`).join(' ');
+        };
+
+        tr.innerHTML = `
+          <td>${r.id}</td>
+          <td style="color:var(--primary-green); font-weight:600;">${r.code}</td>
+          <td>${r.zone}</td>
+          <td>${fmtStd(r.grades.m1)}</td>
+          <td>${fmtStd(r.grades.m2)}</td>
+          <td>${fmtStd(r.grades.m3)}</td>
+          <td>${fmtStd(r.grades.m4)}</td>
+          <td>${fmtStd(r.grades.m5)}</td>
+          <td>${fmtStd(r.grades.m6)}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('registryModal').style.display = 'none';
+  }
+
+  function openMapModal() {
+    document.getElementById('mapModal').style.display = 'flex';
+  }
+
+  function closeMapModal() {
+    document.getElementById('mapModal').style.display = 'none';
+  }
+
+  function exportRegistryCSV() {
+    if (plantRegistryDatabase.length === 0) {
+      alert('ไม่พบข้อมูลทะเบียนสำหรับส่งออก');
+      return;
+    }
+
+    let csvContent = "\uFEFFลำดับ,รหัสพรรณไม้,ชื่อพรรณไม้,บริเวณที่พบ,ม.1,ม.2,ม.3,ม.4,ม.5,ม.6\n";
+
+    plantRegistryDatabase.forEach(r => {
+      let row = [
+        `"${r.id}"`,
+        `"${r.code}"`,
+        `"${r.name}"`,
+        `"${r.zone}"`,
+        `"${r.grades.m1}"`,
+        `"${r.grades.m2}"`,
+        `"${r.grades.m3}"`,
+        `"${r.grades.m4}"`,
+        `"${r.grades.m5}"`,
+        `"${r.grades.m6}"`
+      ];
+      csvContent += row.join(",") + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ทะเบียนพรรณไม้_PCSHSCR_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  window.onload = function() {
+    document.getElementById('gardenMapImg').src = aerialMapSrc;
+    document.getElementById('fullMapImg').src = aerialMapSrc;
+    parseRegistryData();
+    fetchSheetData();
+  };
+</script>
+
+</body>
+</html>
